@@ -11,6 +11,21 @@ env:
   FREETYPE_VERSION: 2.13.2
 
 jobs:
+  download-deps:
+    name: Download dependencies
+
+    steps:
+    - name: Check FreeType
+      id: cache-freetype-src
+      uses: actions/cache@v3
+      with:
+        path: freetype-${{ env.FREETYPE_VERSION }}.tar.gz
+        key: freetype-${{ env.FREETYPE_VERSION }}-source
+
+    - name: Download FreeType
+      if: steps.cache-freetype-src.output.cache-hit != 'true'
+      run: curl -L -o freetype-${FREETYPE_VERSION}.tar.gz https://sourceforge.net/projects/freetype/files/freetype2/${FREETYPE_VERSION}/freetype-${FREETYPE_VERSION}.tar.gz/download
+
   windows:
     name: Windows
     runs-on: windows-latest
@@ -39,9 +54,44 @@ jobs:
         name: tyhylge-windows-${{ matrix.arch.name }}-${{ matrix.build }}
         path: install/*
 
+  build-linux-deps:
+    name: Linux (Build dependencies)
+    needs: download-deps
+    container:
+      image: centos:7
+
+    steps:
+    - name: Install system dependencies
+      run: yum install -y make gcc gcc-c++
+
+    - name: "FreeType: binary cache"
+      id: cache-freetype
+      uses: actions/cache@v3
+      with:
+        path: freetype-build
+        key: ${{ runner.os }}-freetype-${{ env.FREETYPE_VERSION }}
+
+    - name: "FreeType: source cache"
+      if: steps.cache-freetype.output.cache-hit != 'true'
+      uses: actions/cache/restore@v3
+      with:
+        path: freetype-${{ env.FREETYPE_VERSION }}.tar.gz
+        key: freetype-${{ env.FREETYPE_VERSION }}-source
+
+    - name: "FreeType: build"
+      if: steps.cache-freetype.output.cache-hit != 'true'
+      run: |
+        curl -L -o freetype-${FREETYPE_VERSION}.tar.gz https://sourceforge.net/projects/freetype/files/freetype2/${FREETYPE_VERSION}/freetype-${FREETYPE_VERSION}.tar.gz/download
+        tar xf freetype-${FREETYPE_VERSION}.tar.gz
+        cd freetype-${FREETYPE_VERSION}
+        ./configure --prefix=${GITHUB_WORKSPACE}/freetype-build
+        make -j4
+        make install
+
   linux:
     name: Linux
     runs-on: ubuntu-latest
+    needs: build-linux-deps
     container:
       image: centos:7
     env:
@@ -53,6 +103,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: "Dependency: FreeType"
+      uses: actions/cache/restore@v3
+      with:
+        path: freetype-build
+        key: ${{ runner.os }}-freetype-${{ env.FREETYPE_VERSION }}
 
     - name: "Cache CMake ${{ env.CMAKE_VERSION }}"
       id: cache-cmake
@@ -69,26 +125,6 @@ jobs:
 
     - name: "Install CMake ${{ env.CMAKE_VERSION }}"
       run: ./cmake-${CMAKE_VERSION}-linux-x86_64.sh --prefix=/usr/local --skip-license
-
-    - name: Install system dependencies
-      run: yum install -y make gcc gcc-c++
-
-    - name: "Cache dependency: FreeType ${{ env.FREETYPE_VERSION }}"
-      id: cache-freetype
-      uses: actions/cache@v3
-      with:
-        path: freetype-build
-        key: ${{ runner.os }}-freetype-${{ env.FREETYPE_VERSION }}
-
-    - name: "Build dependency: FreeType ${{ env.FREETYPE_VERSION }}"
-      if: steps.cache-freetype.output.cache-hit != 'true'
-      run: |
-        curl -L -o freetype-${FREETYPE_VERSION}.tar.gz https://sourceforge.net/projects/freetype/files/freetype2/${FREETYPE_VERSION}/freetype-${FREETYPE_VERSION}.tar.gz/download
-        tar xf freetype-${FREETYPE_VERSION}.tar.gz
-        cd freetype-${FREETYPE_VERSION}
-        ./configure --prefix=${GITHUB_WORKSPACE}/freetype-build
-        make -j4
-        make install
 
     - name: "CMake: Configure"
       run: >
