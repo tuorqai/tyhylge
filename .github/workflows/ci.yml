@@ -34,16 +34,30 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: centos:7
+    env:
+      CMAKE_VERSION: 3.28.1
 
     steps:
     - uses: actions/checkout@v3
 
-    - name: Install dependencies
+    - name: "Cache CMake ${{ env.CMAKE_VERSION }}"
+      id: cache-cmake
+      uses: actions/cache@v3
+      with:
+        path: cmake-${{ env.CMAKE_VERSION }}-linux-x86_64.sh
+        key: ${{ runner.os }}-${{ env.CMAKE_VERSION }}
+
+    - name: "Download CMake ${{ env.CMAKE_VERSION }}"
+      if: steps.cache-cmake.outputs.cache-hit != 'true'
       run: |
-        curl -L -O https://cmake.org/files/v3.28/cmake-3.28.1-linux-x86_64.sh
-        chmod +x cmake-3.28.1-linux-x86_64.sh
-        ./cmake-3.28.1-linux-x86_64.sh --prefix=/usr/local --skip-license
-        yum install -y make gcc gcc-c++
+        curl -L -O https://cmake.org/files/v3.28/cmake-${{ env.CMAKE_VERSION }}-linux-x86_64.sh
+        chmod +x cmake-${{ env.CMAKE_VERSION }}-linux-x86_64.sh
+
+    - name: "Install CMake ${{ env.CMAKE_VERSION }}"
+      run: ./cmake-${{ env.CMAKE_VERSION }}-linux-x86_64.sh --prefix=/usr/local --skip-license
+
+    - name: Install dependencies
+      run: yum install -y make gcc gcc-c++
 
     - name: "CMake: Configure"
       run: cmake -B build -DCMAKE_BUILD_TYPE=Release
