@@ -149,6 +149,6 @@ jobs:
 
     - uses: actions/upload-artifact@v3
       with:
-        name: tyhylge-linux-amd64-${{ matrix-config.name }}-${{ matrix.build }}
+        name: tyhylge-linux-amd64-${{ matrix.config.name }}-${{ matrix.build }}
         path: install/*
 
