@@ -75,7 +75,7 @@ jobs:
       id: cache-freetype
       uses: actions/cache@v3
       with:
-        path: freetype-build
+        path: freetype-build/
         key: ${{ runner.os }}-freetype-${{ env.FREETYPE_VERSION }}
 
     - name: "Build dependency: FreeType ${{ env.FREETYPE_VERSION }}"
