@@ -78,7 +78,7 @@ jobs:
     - name: "Build dependency: FreeType ${{ env.FREETYPE_VERSION }}"
       if: steps.cache-freetype.output.cache-hit != 'true'
       run: |
-        curl -L -o freetype-${{ env.FREETYPE_VERSION }}.tar.xz https://sourceforge.net/projects/freetype/files/freetype2/${{ env.FREETYPE_VERSION }}/freetype-${{ env.FREETYPE_VERSION }}.tar.xz/download
+        curl -L -o freetype-${{ env.FREETYPE_VERSION }}.tar.gz https://sourceforge.net/projects/freetype/files/freetype2/${{ env.FREETYPE_VERSION }}/freetype-${{ env.FREETYPE_VERSION }}.tar.gz/download
         tar xf freetype-${{ env.FREETYPE_VERSION }}.tar.gz
         cd freetype-${{ env.FREETYPE_VERSION }}
         ./configure --prefix=${{ github.workspace }}/freetype-build
