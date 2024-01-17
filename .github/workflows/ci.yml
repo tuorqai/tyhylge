@@ -22,41 +22,13 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Cache dependency binaries
-      id: cache-depbin
-      uses: actions/cache@v2
-      with:
-        path: deps
-        key: windows-${{ matrix.arch.name }}-depbin-${{ hashFiles('scripts/make-dependencies.sh') }}
-        restore-keys: windows-${{ matrix.arch.name }}-depbin-
-
-    - name: Cache dependency sources
-      if: steps.cache-depbin.outputs.cache-hit != 'true'
-      uses: actions/cache@v2
-      with:
-        path: pkgs
-        key: depsrc-${{ hashFiles('scripts/make-dependencies.sh') }}
-        restore-keys: depsrc-
-
-    - name: Build dependencies
-      if: steps.cache-depbin.outputs.cache-hit != 'true'
-      shell: bash
-      run: scripts/make-dependencies.sh ${{ matrix.arch.flags }}
-
-    - name: "CMake: Configure"
-      run: cmake -B build ${{ matrix.arch.flags }} -DCMAKE_PREFIX_PATH=$env:GITHUB_WORKSPACE/deps -DTYHYLGE_USE_FREETYPE=1
-
-    - name: "CMake: Build"
-      run: cmake --build build --config ${{ matrix.build }}
-
-    - name: "CMake: Install"
-      run: cmake --install build --config ${{ matrix.build }} --prefix install
-
-    - name: Collect static dependencies
-      shell: bash
+    - name: "Build"
       run: |
-        [ -d deps/lib -a install/lib ] && cp -v deps/lib/*.a install/lib
-        [ -d deps/lib64 -a install/lib64 ] && cp -v deps/lib64/*.a install/lib64
+        cmake -B build ${{ matrix.arch.flags }}
+        cmake --build build --config Debug
+        cmake --build build --config Release
+        cmake --install build --config Debug --prefix install/dbg
+        cmake --install build --config Release --prefix install/rel
 
     - uses: actions/upload-artifact@v3
       with:
@@ -64,7 +36,7 @@ jobs:
         path: install/*
 
   linux:
-    name: Linux (${{ matrix.config.name }}-${{ matrix.build.name }})
+    name: linux-${{ matrix.config.name }}
     runs-on: ubuntu-latest
     container:
       image: centos:7
@@ -76,28 +48,30 @@ jobs:
         config:
         - { name: static, flags: -DBUILD_SHARED_LIBS=0 }
         - { name: shared, flags: -DBUILD_SHARED_LIBS=1 }
-        build:
-        - { name: dbg, flags: -DCMAKE_BUILD_TYPE=Debug }
-        - { name: rel, flags: -DCMAKE_BUILD_TYPE=Release }
 
     steps:
     - uses: actions/checkout@v3
 
-    - name: "Cache CMake ${{ env.CMAKE_VERSION }}"
+    - name: "Cache CMake"
       id: cache-cmake
       uses: actions/cache@v2
       with:
         path: cmake-${{ env.CMAKE_VERSION }}-linux-x86_64.sh
         key: ${{ runner.os }}-cmake-${{ env.CMAKE_VERSION }}
 
-    - name: "Download CMake ${{ env.CMAKE_VERSION }}"
+    - name: "Download CMake"
       if: steps.cache-cmake.outputs.cache-hit != 'true'
       run: |
         curl -L -O https://cmake.org/files/v3.28/cmake-${CMAKE_VERSION}-linux-x86_64.sh
         chmod +x cmake-${CMAKE_VERSION}-linux-x86_64.sh
 
-    - name: "Install CMake ${{ env.CMAKE_VERSION }}"
+    - name: "Install CMake"
       run: ./cmake-${CMAKE_VERSION}-linux-x86_64.sh --prefix=/usr/local --skip-license
+
+    - name: "Install Ninja"
+      run: |
+        curl -L -o ninja-linux.zip https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-linux.zip
+        unzip ninja-linux.zip -d /usr/local/bin
 
     - name: Install system dependencies
       run: yum install -y make gcc gcc-c++
@@ -122,28 +96,22 @@ jobs:
       if: steps.cache-depbin.outputs.cache-hit != 'true'
       run: scripts/make-dependencies.sh
 
-    - name: "CMake: Configure"
-      run: >
-        cmake -B build
-        ${{ matrix.build.flags }}
-        ${{ matrix.config.flags }}
-        -DCMAKE_PREFIX_PATH=${GITHUB_WORKSPACE}/deps
-        -DTYHYLGE_USE_FREETYPE=1
-
-    - name: "CMake: Build"
-      run: cmake --build build
-
-    - name: "CMake: Install"
-      run: cmake --install build --prefix install
+    - name: "Build"
+      run: |
+        cmake -B build -G "Ninja Multi-Config" ${{ matrix.build.flags }} ${{ matrix.config.flags }} -DCMAKE_PREFIX_PATH=${GITHUB_WORKSPACE}/deps -DTYHYLGE_USE_FREETYPE=1
+        cmake --build build --config Debug
+        cmake --build build --config Release
+        cmake --install build --config Debug --prefix install/dbg
+        cmake --install build --config Release --prefix install/rel
 
     - name: Collect static dependencies
       if: matrix.config.name == 'static'
       run: |
-        [ -d deps/lib -a install/lib ] && cp -v deps/lib/*.a install/lib
-        [ -d deps/lib64 -a install/lib64 ] && cp -v deps/lib64/*.a install/lib64
+        [ -d deps/lib ] && mkdir -p install/{dbg,rel}/lib && cp -v deps/lib/*.a install/{dbg,rel}/lib
+        [ -d deps/lib64 ] && mkdir -p install/{dbg,rel}/lib64 && cp -v deps/lib64/*.a install/{dbg,rel}/lib64
 
     - uses: actions/upload-artifact@v3
       with:
-        name: tyhylge-linux-amd64-${{ matrix.config.name }}-${{ matrix.build.name }}
+        name: tyhylge-linux-amd64-${{ matrix.config.name }}
         path: install/*
 
