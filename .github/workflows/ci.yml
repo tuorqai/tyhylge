@@ -68,6 +68,9 @@ jobs:
     - name: "Install CMake ${{ env.CMAKE_VERSION }}"
       run: ./cmake-${{ env.CMAKE_VERSION }}-linux-x86_64.sh --prefix=/usr/local --skip-license
 
+    - name: Install system dependencies
+      run: yum install -y make gcc gcc-c++
+
     - name: "Cache dependency: FreeType ${{ env.FREETYPE_VERSION }}"
       id: cache-freetype
       uses: actions/cache@v3
@@ -84,9 +87,6 @@ jobs:
         ./configure --prefix=${{ github.workspace }}/freetype-build
         make -j4
         make install
-
-    - name: Install system dependencies
-      run: yum install -y make gcc gcc-c++
 
     - name: "CMake: Configure"
       run: >
