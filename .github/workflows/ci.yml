@@ -13,6 +13,7 @@ env:
 jobs:
   download-deps:
     name: Download dependencies
+    runs-on: ubuntu-latest
 
     steps:
     - name: Check FreeType
