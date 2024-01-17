@@ -12,6 +12,12 @@ if(BUILD_SHARED_LIBS)
     target_compile_definitions(tyhylge PRIVATE TYHYLGE_SHARED)
 endif()
 
+if(TYHYLGE_USE_PYTHON)
+    find_package(Python REQUIRED COMPONENTS Development)
+    target_compile_definitions(tyhylge PRIVATE TYHYLGE_USE_PYTHON)
+    target_link_libraries(tyhylge PRIVATE Python3::Python)
+endif()
+
 if(TYHYLGE_USE_FREETYPE)
     find_package(Freetype REQUIRED)
     target_compile_definitions(tyhylge PRIVATE TYHYLGE_USE_FREETYPE)
