@@ -12,21 +12,28 @@ jobs:
     name: Windows
     runs-on: windows-latest
 
+    strategy:
+      matrix:
+        arch:
+        - { name: x86, flags: -A Win32 }
+        - { name: x64, flags: -A x64 }
+        build: [ Debug, Release ]
+
     steps:
     - uses: actions/checkout@v3
 
     - name: "CMake: Configure"
-      run: cmake -B build
+      run: cmake -B build ${{ matrix.arch.flags }}
 
     - name: "CMake: Build"
-      run: cmake --build build --config Release
+      run: cmake --build build --config ${{ matrix.build }}
 
     - name: "CMake: Install"
-      run: cmake --install build --config Release --prefix install
+      run: cmake --install build --config ${{ matrix.build }} --prefix install
 
     - uses: actions/upload-artifact@v3
       with:
-        name: tyhylge-windows
+        name: tyhylge-windows-${{ matrix.arch.name }}-${{ matrix.build }}
         path: install/*
 
   linux:
@@ -36,6 +43,10 @@ jobs:
       image: centos:7
     env:
       CMAKE_VERSION: 3.28.1
+
+    strategy:
+      matrix:
+        build: [ Debug, Release ]
 
     steps:
     - uses: actions/checkout@v3
@@ -60,7 +71,7 @@ jobs:
       run: yum install -y make gcc gcc-c++
 
     - name: "CMake: Configure"
-      run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+      run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build }}
 
     - name: "CMake: Build"
       run: cmake --build build
@@ -70,6 +81,6 @@ jobs:
 
     - uses: actions/upload-artifact@v3
       with:
-        name: tyhylge-linux
+        name: tyhylge-linux-amd64-${{ matrix.build }}
         path: install/*
 
