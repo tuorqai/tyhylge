@@ -1,5 +1,9 @@
 
 add_library(tyhylge tyhylge.c)
+target_include_directories(tyhylge
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_compile_definitions(tyhylge PRIVATE TYHYLGE_BUILD)
 
 set_target_properties(tyhylge
