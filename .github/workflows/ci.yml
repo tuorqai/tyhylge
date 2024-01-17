@@ -43,7 +43,7 @@ jobs:
         curl -L -O https://cmake.org/files/v3.28/cmake-3.28.1-linux-x86_64.sh
         chmod +x cmake-3.28.1-linux-x86_64.sh
         ./cmake-3.28.1-linux-x86_64.sh --prefix=/usr/local --skip-license
-        yum install -y make gcc
+        yum install -y make gcc gcc-c++
 
     - name: "CMake: Configure"
       run: cmake -B build -DCMAKE_BUILD_TYPE=Release
