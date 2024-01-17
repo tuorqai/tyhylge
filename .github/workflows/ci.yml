@@ -52,6 +52,11 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Set dependency build path
+      id: dependency-path
+      run: |
+        echo "path=${{ github.workspace }}" >> "$GITHUB_OUTPUT"
+
     - name: "Cache CMake ${{ env.CMAKE_VERSION }}"
       id: cache-cmake
       uses: actions/cache@v3
@@ -75,7 +80,7 @@ jobs:
       id: cache-freetype
       uses: actions/cache@v3
       with:
-        path: ${{ github.workspace }}/freetype-build
+        path: ${{ steps.dependency-path.outputs.path }}/freetype-build
         key: ${{ runner.os }}-freetype-${{ env.FREETYPE_VERSION }}
 
     - name: "Build dependency: FreeType ${{ env.FREETYPE_VERSION }}"
