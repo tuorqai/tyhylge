@@ -22,14 +22,41 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Cache dependency binaries
+      id: cache-depbin
+      uses: actions/cache@v2
+      with:
+        path: deps
+        key: windows-${{ matrix.arch.name }}-depbin-${{ hashFiles('scripts/make-dependencies.sh') }}
+        restore-keys: windows-${{ matrix.arch.name }}-depbin-
+
+    - name: Cache dependency sources
+      if: steps.cache-depbin.outputs.cache-hit != 'true'
+      uses: actions/cache@v2
+      with:
+        path: pkgs
+        key: depsrc-${{ hashFiles('scripts/make-dependencies.sh') }}
+        restore-keys: depsrc-
+
+    - name: Build dependencies
+      if: steps.cache-depbin.outputs.cache-hit != 'true'
+      shell: bash
+      run: scripts/make-dependencies.sh ${{ matrix.arch.flags }}
+
     - name: "CMake: Configure"
-      run: cmake -B build ${{ matrix.arch.flags }}
+      run: cmake -B build ${{ matrix.arch.flags }} -DCMAKE_PREFIX_PATH=$env:GITHUB_WORKSPACE/deps -DTYHYLGE_USE_FREETYPE=1
 
     - name: "CMake: Build"
       run: cmake --build build --config ${{ matrix.build }}
 
     - name: "CMake: Install"
       run: cmake --install build --config ${{ matrix.build }} --prefix install
+
+    - name: Collect static dependencies
+      shell: bash
+      run: |
+        [ -d deps/lib -a install/lib ] && cp -v deps/lib/*.a install/lib
+        [ -d deps/lib64 -a install/lib64 ] && cp -v deps/lib64/*.a install/lib64
 
     - uses: actions/upload-artifact@v3
       with:

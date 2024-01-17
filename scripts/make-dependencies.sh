@@ -43,7 +43,7 @@ tar xf "${PKG_PREFIX}/${VORBIS_PKG}"
 # Build dependencies
 
 cd "${WORKSPACE}/freetype-${FREETYPE_VERSION}"
-cmake -B build \
+cmake -B build $@ \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_PREFIX_PATH="${PREFIX}" \
     -DCMAKE_POSITION_INDEPENDENT_CODE=1 \
@@ -52,7 +52,7 @@ cmake --build build
 cmake --install build --prefix "${PREFIX}"
 
 cd "${WORKSPACE}/libogg-${OGG_VERSION}"
-cmake -B build \
+cmake -B build $@ \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_PREFIX_PATH="${PREFIX}" \
     -DCMAKE_POSITION_INDEPENDENT_CODE=1 \
@@ -64,7 +64,7 @@ cmake --install build --prefix "${PREFIX}"
 # Note: partially ignores --prefix parameter,
 # but not CMAKE_INSTALL_PREFIX
 cd "${WORKSPACE}/libvorbis-${VORBIS_VERSION}"
-cmake -B build \
+cmake -B build $@ \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_PREFIX_PATH="${PREFIX}" \
     -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
