@@ -2,6 +2,11 @@
 add_library(tyhylge tyhylge.c)
 target_compile_definitions(tyhylge PRIVATE TYHYLGE_BUILD)
 
+set_target_properties(tyhylge
+    PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
+        C_VISIBILITY_PRESET hidden)
+
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(tyhylge PRIVATE TYHYLGE_SHARED)
 endif()
