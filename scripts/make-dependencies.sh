@@ -46,6 +46,7 @@ cd "${WORKSPACE}/freetype-${FREETYPE_VERSION}"
 cmake -B build \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_PREFIX_PATH="${PREFIX}" \
+    -DCMAKE_POSITION_INDEPENDENT_CODE=1 \
     -DBUILD_SHARED_LIBS=0
 cmake --build build
 cmake --install build --prefix "${PREFIX}"
@@ -54,6 +55,7 @@ cd "${WORKSPACE}/libogg-${OGG_VERSION}"
 cmake -B build \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_PREFIX_PATH="${PREFIX}" \
+    -DCMAKE_POSITION_INDEPENDENT_CODE=1 \
     -DBUILD_SHARED_LIBS=0 \
     -DBUILD_TESTING=0
 cmake --build build
@@ -66,6 +68,7 @@ cmake -B build \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_PREFIX_PATH="${PREFIX}" \
     -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
+    -DCMAKE_POSITION_INDEPENDENT_CODE=1 \
     -DBUILD_SHARED_LIBS=0
 cmake --build build
 cmake --install build
