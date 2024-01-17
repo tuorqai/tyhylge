@@ -24,7 +24,7 @@ jobs:
         key: freetype-${{ env.FREETYPE_VERSION }}-source
 
     - name: "FreeType: download"
-      if: steps.cache-freetype-src.output.cache-hit != 'true'
+      if: steps.cache-freetype-src.outputs.cache-hit != 'true'
       run: curl -L -o freetype-${FREETYPE_VERSION}.tar.gz https://sourceforge.net/projects/freetype/files/freetype2/${FREETYPE_VERSION}/freetype-${FREETYPE_VERSION}.tar.gz/download
 
   windows:
@@ -74,14 +74,14 @@ jobs:
         key: ${{ runner.os }}-freetype-${{ env.FREETYPE_VERSION }}
 
     - name: "FreeType: source cache"
-      if: steps.cache-freetype.output.cache-hit != 'true'
+      if: steps.cache-freetype.outputs.cache-hit != 'true'
       uses: actions/cache/restore@v3
       with:
         path: freetype-${{ env.FREETYPE_VERSION }}.tar.gz
         key: freetype-${{ env.FREETYPE_VERSION }}-source
 
     - name: "FreeType: build"
-      if: steps.cache-freetype.output.cache-hit != 'true'
+      if: steps.cache-freetype.outputs.cache-hit != 'true'
       run: |
         tar xf freetype-${FREETYPE_VERSION}.tar.gz
         cd freetype-${FREETYPE_VERSION}
