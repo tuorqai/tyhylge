@@ -71,6 +71,7 @@ jobs:
     - name: "Install Ninja"
       run: |
         curl -L -o ninja-linux.zip https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-linux.zip
+        yum install -y unzip
         unzip ninja-linux.zip -d /usr/local/bin
 
     - name: Install system dependencies
