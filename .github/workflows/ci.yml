@@ -37,7 +37,7 @@ jobs:
         path: install/*
 
   linux:
-    name: Linux
+    name: Linux (${{ matrix.config.name }}-${{ matrix.build.name }})
     runs-on: ubuntu-latest
     container:
       image: centos:7
@@ -47,9 +47,11 @@ jobs:
     strategy:
       matrix:
         config:
-        - { name: Static, flags: -DBUILD_SHARED_LIBS=0 }
-        - { name: Shared, flags: -DBUILD_SHARED_LIBS=1 }
-        build: [ Debug, Release ]
+        - { name: static, flags: -DBUILD_SHARED_LIBS=0 }
+        - { name: shared, flags: -DBUILD_SHARED_LIBS=1 }
+        build:
+        - { name: dbg, flags: -DCMAKE_BUILD_TYPE=Debug }
+        - { name: rel, flags: -DCMAKE_BUILD_TYPE=Release }
 
     steps:
     - uses: actions/checkout@v3
@@ -71,7 +73,7 @@ jobs:
       run: ./cmake-${CMAKE_VERSION}-linux-x86_64.sh --prefix=/usr/local --skip-license
 
     - name: Install system dependencies
-      run: yum install -y tree make gcc gcc-c++
+      run: yum install -y make gcc gcc-c++
 
     - name: Cache dependency binaries
       id: cache-depbin
@@ -93,19 +95,13 @@ jobs:
       if: steps.cache-depbin.outputs.cache-hit != 'true'
       run: scripts/make-dependencies.sh
 
-    - name: "(TBR) tree deps"
-      run: tree deps
-
-    - name: "(TBR) tree pkgs"
-      run: tree pkgs
-
     - name: "CMake: Configure"
       run: >
         cmake -B build
-        -DCMAKE_BUILD_TYPE=${{ matrix.build }}
+        ${{ matrix.build.flags }}
+        ${{ matrix.config.flags }}
         -DCMAKE_PREFIX_PATH=${GITHUB_WORKSPACE}/deps
         -DTYHYLGE_USE_FREETYPE=1
-        ${{ matrix.config.flags }}
 
     - name: "CMake: Build"
       run: cmake --build build
@@ -113,8 +109,14 @@ jobs:
     - name: "CMake: Install"
       run: cmake --install build --prefix install
 
+    - name: Collect static dependencies
+      if: matrix.config.name == 'static'
+      run: |
+        [ -d deps/lib -a install/lib ] && cp -v deps/lib/*.a install/lib
+        [ -d deps/lib64 -a install/lib64 ] && cp -v deps/lib64/*.a install/lib64
+
     - uses: actions/upload-artifact@v3
       with:
-        name: tyhylge-linux-amd64-${{ matrix.config.name }}-${{ matrix.build }}
+        name: tyhylge-linux-amd64-${{ matrix.config.name }}-${{ matrix.build.name }}
         path: install/*
 
