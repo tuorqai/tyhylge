@@ -52,11 +52,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set dependency build path
-      id: dependency-path
-      run: |
-        echo "path=${{ github.workspace }}" >> "$GITHUB_OUTPUT"
-
     - name: "Cache CMake ${{ env.CMAKE_VERSION }}"
       id: cache-cmake
       uses: actions/cache@v3
@@ -67,11 +62,11 @@ jobs:
     - name: "Download CMake ${{ env.CMAKE_VERSION }}"
       if: steps.cache-cmake.outputs.cache-hit != 'true'
       run: |
-        curl -L -O https://cmake.org/files/v3.28/cmake-${{ env.CMAKE_VERSION }}-linux-x86_64.sh
-        chmod +x cmake-${{ env.CMAKE_VERSION }}-linux-x86_64.sh
+        curl -L -O https://cmake.org/files/v3.28/cmake-${CMAKE_VERSION}-linux-x86_64.sh
+        chmod +x cmake-${CMAKE_VERSION}-linux-x86_64.sh
 
     - name: "Install CMake ${{ env.CMAKE_VERSION }}"
-      run: ./cmake-${{ env.CMAKE_VERSION }}-linux-x86_64.sh --prefix=/usr/local --skip-license
+      run: ./cmake-${CMAKE_VERSION}-linux-x86_64.sh --prefix=/usr/local --skip-license
 
     - name: Install system dependencies
       run: yum install -y make gcc gcc-c++
@@ -80,16 +75,16 @@ jobs:
       id: cache-freetype
       uses: actions/cache@v3
       with:
-        path: ${{ steps.dependency-path.outputs.path }}/freetype-build
+        path: freetype-build
         key: ${{ runner.os }}-freetype-${{ env.FREETYPE_VERSION }}
 
     - name: "Build dependency: FreeType ${{ env.FREETYPE_VERSION }}"
       if: steps.cache-freetype.output.cache-hit != 'true'
       run: |
-        curl -L -o freetype-${{ env.FREETYPE_VERSION }}.tar.gz https://sourceforge.net/projects/freetype/files/freetype2/${{ env.FREETYPE_VERSION }}/freetype-${{ env.FREETYPE_VERSION }}.tar.gz/download
-        tar xf freetype-${{ env.FREETYPE_VERSION }}.tar.gz
-        cd freetype-${{ env.FREETYPE_VERSION }}
-        ./configure --prefix=${{ github.workspace }}/freetype-build
+        curl -L -o freetype-${FREETYPE_VERSION}.tar.gz https://sourceforge.net/projects/freetype/files/freetype2/${FREETYPE_VERSION}/freetype-${FREETYPE_VERSION}.tar.gz/download
+        tar xf freetype-${FREETYPE_VERSION}.tar.gz
+        cd freetype-${FREETYPE_VERSION}
+        ./configure --prefix=${GITHUB_WORKSPACE}/freetype-build
         make -j4
         make install
 
@@ -97,7 +92,7 @@ jobs:
       run: >
         cmake -B build
         -DCMAKE_BUILD_TYPE=${{ matrix.build }}
-        -DCMAKE_PREFIX_PATH=${{ github.workspace }}/freetype-build
+        -DCMAKE_PREFIX_PATH=${GITHUB_WORKSPACE}/freetype-build
         -DTYHYLGE_USE_FREETYPE=1
 
     - name: "CMake: Build"
