@@ -11,6 +11,12 @@ if(BUILD_SHARED_LIBS)
     target_compile_definitions(tyhylge PRIVATE TYHYLGE_SHARED)
 endif()
 
+if(TYHYLGE_USE_FREETYPE)
+    find_package(Freetype REQUIRED)
+    target_compile_definitions(tyhylge PRIVATE TYHYLGE_USE_FREETYPE)
+    target_link_libraries(tyhylge PRIVATE Freetype::Freetype)
+endif()
+
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
