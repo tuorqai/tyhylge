@@ -79,7 +79,7 @@ jobs:
       with:
         path: deps
         key: linux-depbin-${{ hashFiles('scripts/make-dependencies.sh') }}
-        restore-keys: [ linux-depbin- ]
+        restore-keys: linux-depbin-
 
     - name: Cache dependency sources
       if: steps.cache-depbin.outputs.cache-hit != 'true'
@@ -87,7 +87,7 @@ jobs:
       with:
         path: pkgs
         key: depsrc-${{ hashFiles('scripts/make-dependencies.sh') }}
-        restore-keys: [ depsrc- ]
+        restore-keys: depsrc-
 
     - name: Build dependencies
       if: steps.cache-depbin.outputs.cache-hit != 'true'
