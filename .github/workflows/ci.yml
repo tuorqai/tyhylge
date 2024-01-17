@@ -1,0 +1,35 @@
+
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  windows:
+    name: Windows
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: CMake: Configure
+      run: cmake -B build
+
+    - name: CMake: Build
+      run: cmake --build build --config Release
+
+  linux:
+    name: Linux
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: CMake: Configure
+      run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+    - name: CMake: Build
+      run: cmake --build build
