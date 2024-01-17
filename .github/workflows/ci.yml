@@ -9,22 +9,24 @@ on:
 
 jobs:
   windows:
-    name: Windows
+    name: ${{ matrix.arch.name }}-${{ matrix.build.name }}
     runs-on: windows-latest
 
     strategy:
       matrix:
         arch:
-        - { name: x86, flags: -A Win32 }
-        - { name: x64, flags: -A x64 }
-        build: [ Debug, Release ]
+        - { name: win32, flags: -A Win32 }
+        - { name: win64, flags: -A x64 }
+        build:
+        - { name: static, flags: -DBUILD_SHARED_LIBS=0 }
+        - { name: shared, flags: -DBUILD_SHARED_LIBS=1 }
 
     steps:
     - uses: actions/checkout@v3
 
     - name: "Build"
       run: |
-        cmake -B build ${{ matrix.arch.flags }}
+        cmake -B build ${{ matrix.arch.flags }} ${{ matrix.build.flags }}
         cmake --build build --config Debug
         cmake --build build --config Release
         cmake --install build --config Debug --prefix install/dbg
@@ -32,7 +34,7 @@ jobs:
 
     - uses: actions/upload-artifact@v3
       with:
-        name: tyhylge-windows-${{ matrix.arch.name }}-${{ matrix.build }}
+        name: tyhylge-${{ matrix.arch.name }}-${{ matrix.build.name }}
         path: install/*
 
   linux:
@@ -42,6 +44,7 @@ jobs:
       image: centos:7
     env:
       CMAKE_VERSION: 3.28.1
+      NINJA_VERSION: 1.11.1
 
     strategy:
       matrix:
@@ -70,7 +73,7 @@ jobs:
 
     - name: "Install Ninja"
       run: |
-        curl -L -o ninja-linux.zip https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-linux.zip
+        curl -L -o ninja-linux.zip https://github.com/ninja-build/ninja/releases/download/v${NINJA_VERSION}/ninja-linux.zip
         yum install -y unzip
         unzip ninja-linux.zip -d /usr/local/bin
 

@@ -4,6 +4,7 @@ target_compile_definitions(tyhylge PRIVATE TYHYLGE_BUILD)
 
 set_target_properties(tyhylge
     PROPERTIES
+        PUBLIC_HEADER tyhylge.h
         POSITION_INDEPENDENT_CODE ON
         C_VISIBILITY_PRESET hidden)
 
@@ -24,7 +25,8 @@ install(TARGETS tyhylge
     EXPORT tyhylge-targets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    PUBLIC_HEADER ${CMAKE_INSTALL_INCLUDEDIR})
 
 install(EXPORT tyhylge-targets
     NAMESPACE tyhylge::
