@@ -17,9 +17,9 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 if(TYHYLGE_USE_PYTHON)
-    find_package(Python3 REQUIRED COMPONENTS Development)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
     target_compile_definitions(tyhylge PRIVATE TYHYLGE_USE_PYTHON)
-    target_link_libraries(tyhylge PRIVATE Python3::Python)
+    target_link_libraries(tyhylge PRIVATE Python3::Interpreter Python3::Python)
 endif()
 
 if(TYHYLGE_USE_FREETYPE)
