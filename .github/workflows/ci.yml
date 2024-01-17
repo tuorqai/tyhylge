@@ -29,8 +29,8 @@ jobs:
         cmake -B build ${{ matrix.arch.flags }} ${{ matrix.build.flags }} -DTYHYLGE_USE_PYTHON=1
         cmake --build build --config Debug
         cmake --build build --config Release
-        cmake --install build --config Debug --prefix install/dbg
-        cmake --install build --config Release --prefix install/rel
+        cmake --install build --config Debug --prefix install/tyhylge-dbg
+        cmake --install build --config Release --prefix install/tyhylge-rel
 
     - uses: actions/upload-artifact@v3
       with:
@@ -105,16 +105,16 @@ jobs:
         cmake -B build -G "Ninja Multi-Config" ${{ matrix.build.flags }} ${{ matrix.config.flags }} -DCMAKE_PREFIX_PATH=${GITHUB_WORKSPACE}/deps -DTYHYLGE_USE_FREETYPE=1
         cmake --build build --config Debug
         cmake --build build --config Release
-        cmake --install build --config Debug --prefix install/dbg
-        cmake --install build --config Release --prefix install/rel
+        cmake --install build --config Debug --prefix install/tyhylge-dbg
+        cmake --install build --config Release --prefix install/tyhylge-rel
 
     - name: Collect static dependencies
       if: matrix.config.name == 'static'
       run: |
-        [ -d deps/lib ] && mkdir -p install/dbg/lib && cp -v deps/lib/*.a install/dbg/lib
-        [ -d deps/lib ] && mkdir -p install/rel/lib && cp -v deps/lib/*.a install/rel/lib
-        [ -d deps/lib64 ] && mkdir -p install/dbg/lib64 && cp -v deps/lib64/*.a install/dbg/lib64
-        [ -d deps/lib64 ] && mkdir -p install/rel/lib64 && cp -v deps/lib64/*.a install/rel/lib64
+        [ -d deps/lib ] && mkdir -p install/tyhylge-dbg/lib && cp -v deps/lib/*.a install/tyhylge-dbg/lib
+        [ -d deps/lib ] && mkdir -p install/tyhylge-rel/lib && cp -v deps/lib/*.a install/tyhylge-rel/lib
+        [ -d deps/lib64 ] && mkdir -p install/tyhylge-dbg/lib64 && cp -v deps/lib64/*.a install/tyhylge-dbg/lib64
+        [ -d deps/lib64 ] && mkdir -p install/tyhylge-rel/lib64 && cp -v deps/lib64/*.a install/tyhylge-rel/lib64
 
     - uses: actions/upload-artifact@v3
       with:
