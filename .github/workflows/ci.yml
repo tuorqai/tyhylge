@@ -16,14 +16,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check FreeType
+    - name: "FreeType: cache"
       id: cache-freetype-src
       uses: actions/cache@v3
       with:
         path: freetype-${{ env.FREETYPE_VERSION }}.tar.gz
         key: freetype-${{ env.FREETYPE_VERSION }}-source
 
-    - name: Download FreeType
+    - name: "FreeType: download"
       if: steps.cache-freetype-src.output.cache-hit != 'true'
       run: curl -L -o freetype-${FREETYPE_VERSION}.tar.gz https://sourceforge.net/projects/freetype/files/freetype2/${FREETYPE_VERSION}/freetype-${FREETYPE_VERSION}.tar.gz/download
 
@@ -83,7 +83,6 @@ jobs:
     - name: "FreeType: build"
       if: steps.cache-freetype.output.cache-hit != 'true'
       run: |
-        curl -L -o freetype-${FREETYPE_VERSION}.tar.gz https://sourceforge.net/projects/freetype/files/freetype2/${FREETYPE_VERSION}/freetype-${FREETYPE_VERSION}.tar.gz/download
         tar xf freetype-${FREETYPE_VERSION}.tar.gz
         cd freetype-${FREETYPE_VERSION}
         ./configure --prefix=${GITHUB_WORKSPACE}/freetype-build
