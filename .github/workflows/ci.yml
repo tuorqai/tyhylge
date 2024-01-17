@@ -26,7 +26,7 @@ jobs:
 
     - name: "Build"
       run: |
-        cmake -B build ${{ matrix.arch.flags }} ${{ matrix.build.flags }}
+        cmake -B build ${{ matrix.arch.flags }} ${{ matrix.build.flags }} -DTYHYLGE_USE_PYTHON=1
         cmake --build build --config Debug
         cmake --build build --config Release
         cmake --install build --config Debug --prefix install/dbg
