@@ -1,0 +1,50 @@
+
+name: Windows
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: ${{ matrix.build.name }}-${{ matrix.arch }}
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - { name: static, flags: -DBUILD_SHARED_LIBS=0 }
+        - { name: shared, flags: -DBUILD_SHARED_LIBS=1 }
+        arch: [ x64, x86 ]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: egor-tensin/vs-shell@v2
+      with:
+        arch: ${{ matrix.arch }}
+
+    - name: Configure
+      run: >
+        cmake -B build -G "Ninja Multi-Config"
+        ${{ matrix.build.flags }}
+        -DTYHYLGE_USE_PYTHON=1
+
+    - name: Build (Debug)
+      run: |
+        cmake --build build --config Debug
+        cmake --install build --config Debug --prefix install/tyhylge-dbg
+
+    - name: Build (Release)
+      run: |
+        cmake --build build --config Release
+        cmake --install build --config Release --prefix install/tyhylge-rel
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: tyhylge-${{ matrix.build.name }}-${{ matrix.arch }}
+        path: install/*
+

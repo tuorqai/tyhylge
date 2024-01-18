@@ -8,36 +8,6 @@ on:
     branches: [ "main" ]
 
 jobs:
-  windows:
-    name: ${{ matrix.arch.name }}-${{ matrix.build.name }}
-    runs-on: windows-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        arch:
-        - { name: win32, flags: -A Win32 }
-        - { name: win64, flags: -A x64 }
-        build:
-        - { name: static, flags: -DBUILD_SHARED_LIBS=0 }
-        - { name: shared, flags: -DBUILD_SHARED_LIBS=1 }
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: "Build"
-      run: |
-        cmake -B build ${{ matrix.arch.flags }} ${{ matrix.build.flags }} -DTYHYLGE_USE_PYTHON=1
-        cmake --build build --config Debug
-        cmake --build build --config Release
-        cmake --install build --config Debug --prefix install/tyhylge-dbg
-        cmake --install build --config Release --prefix install/tyhylge-rel
-
-    - uses: actions/upload-artifact@v3
-      with:
-        name: tyhylge-${{ matrix.arch.name }}-${{ matrix.build.name }}
-        path: install/*
-
   linux:
     name: linux-${{ matrix.config.name }}
     runs-on: ubuntu-latest
@@ -102,12 +72,21 @@ jobs:
       if: steps.cache-depbin.outputs.cache-hit != 'true'
       run: scripts/make-dependencies.sh
 
-    - name: "Build"
+    - name: Configure
+      run: >
+        cmake -B build -G "Ninja Multi-Config"
+        ${{ matrix.build.flags }}
+        ${{ matrix.config.flags }}
+        -DCMAKE_PREFIX_PATH=${GITHUB_WORKSPACE}/deps
+        -DTYHYLGE_USE_FREETYPE=1
+
+    - name: Build (Debug)
       run: |
-        cmake -B build -G "Ninja Multi-Config" ${{ matrix.build.flags }} ${{ matrix.config.flags }} -DCMAKE_PREFIX_PATH=${GITHUB_WORKSPACE}/deps -DTYHYLGE_USE_FREETYPE=1
         cmake --build build --config Debug
-        cmake --build build --config Release
         cmake --install build --config Debug --prefix install/tyhylge-dbg
+
+    - name: Build (Release)
+        cmake --build build --config Release
         cmake --install build --config Release --prefix install/tyhylge-rel
 
     - name: Collect static dependencies
@@ -120,6 +99,6 @@ jobs:
 
     - uses: actions/upload-artifact@v3
       with:
-        name: tyhylge-linux-amd64-${{ matrix.config.name }}
+        name: tyhylge-linux-${{ matrix.config.name }}-amd64
         path: install/*
 
