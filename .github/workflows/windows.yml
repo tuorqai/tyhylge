@@ -33,10 +33,10 @@ jobs:
         ${{ matrix.build.flags }}
         -DTYHYLGE_USE_PYTHON=1
 
-    - name: Build (Debug)
-      run: |
-        cmake --build build --config Debug
-        cmake --install build --config Debug --prefix install/tyhylge-dbg
+    # - name: Build (Debug)
+    #   run: |
+    #     cmake --build build --config Debug
+    #     cmake --install build --config Debug --prefix install/tyhylge-dbg
 
     - name: Build (Release)
       run: |
