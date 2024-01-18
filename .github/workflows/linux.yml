@@ -86,6 +86,7 @@ jobs:
         cmake --install build --config Debug --prefix install/tyhylge-dbg
 
     - name: Build (Release)
+      run: |
         cmake --build build --config Release
         cmake --install build --config Release --prefix install/tyhylge-rel
 
