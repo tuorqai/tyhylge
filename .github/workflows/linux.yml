@@ -51,7 +51,7 @@ jobs:
         unzip ninja-linux.zip -d /usr/local/bin
 
     - name: Install system dependencies
-      run: yum install -y make gcc gcc-c++
+      run: yum install -y make gcc gcc-c++ bzip2
 
     - name: Cache dependency binaries
       id: cache-depbin
