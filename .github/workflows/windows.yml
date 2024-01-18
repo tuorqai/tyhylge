@@ -31,7 +31,6 @@ jobs:
       run: >
         cmake -B build -G "Ninja Multi-Config"
         ${{ matrix.build.flags }}
-        -DTYHYLGE_USE_PYTHON=1
 
     - name: Build (Debug)
       run: |
