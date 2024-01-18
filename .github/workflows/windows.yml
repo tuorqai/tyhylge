@@ -33,10 +33,14 @@ jobs:
         ${{ matrix.build.flags }}
         -DTYHYLGE_USE_PYTHON=1
 
-    # - name: Build (Debug)
-    #   run: |
-    #     cmake --build build --config Debug
-    #     cmake --install build --config Debug --prefix install/tyhylge-dbg
+    - name: Build (Debug)
+      run: |
+        cmake --build build --config Debug
+        cmake --install build --config Debug --prefix install/tyhylge-dbg
+
+    - name: Enable Python
+      if: matrix.arch == 'x64'
+      run: cmake -B build -DTYHYLGE_USE_PYTHON=1
 
     - name: Build (Release)
       run: |
@@ -47,4 +51,11 @@ jobs:
       with:
         name: tyhylge-${{ matrix.build.name }}-${{ matrix.arch }}
         path: install/*
+
+    - uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags')
+      with:
+        files: |
+          install/*
+          README.md
 
