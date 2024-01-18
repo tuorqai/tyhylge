@@ -47,15 +47,18 @@ jobs:
         cmake --build build --config Release
         cmake --install build --config Release --prefix install/tyhylge-rel
 
+    - name: Create ZIP archive
+      run: |
+        Compress-Archive -Path 'install\*' -DestinationPath tyhylge-${{ matrix.build.name }}-${{ matrix.arch }}.zip
+
     - uses: actions/upload-artifact@v3
       with:
         name: tyhylge-${{ matrix.build.name }}-${{ matrix.arch }}
-        path: install/*
+        path: tyhylge-${{ matrix.build.name }}-${{ matrix.arch }}.zip
 
     - uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags')
       with:
         files: |
-          install/*
-          README.md
+          tyhylge-${{ matrix.build.name }}-${{ matrix.arch }}.zip
 

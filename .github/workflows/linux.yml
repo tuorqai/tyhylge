@@ -99,15 +99,18 @@ jobs:
         [ -d deps/lib64 ] && mkdir -p install/tyhylge-dbg/lib64 && cp -v deps/lib64/*.a install/tyhylge-dbg/lib64
         [ -d deps/lib64 ] && mkdir -p install/tyhylge-rel/lib64 && cp -v deps/lib64/*.a install/tyhylge-rel/lib64
 
+    - name: Compress output
+      run: |
+        tar -vcjf tyhylge-linux-${{ matrix.config.name }}-amd64.tbz2 install/*
+
     - uses: actions/upload-artifact@v3
       with:
         name: tyhylge-linux-${{ matrix.config.name }}-amd64
-        path: install/*
+        path: tyhylge-linux-${{ matrix.config.name }}-amd64.tbz2
 
     - uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags')
       with:
         files: |
-          install/*
-          README.md
+          tyhylge-linux-${{ matrix.config.name }}-amd64.tbz2
 
